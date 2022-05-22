@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Misc;
+namespace pbot\Misc;
 
-use Bots\IBot;
+use pbot\Bots\IBot;
 
 class Application
 {

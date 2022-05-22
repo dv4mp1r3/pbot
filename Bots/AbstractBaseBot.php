@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Bots;
+namespace pbot\Bots;
 
-use Commands\CommandListener;
+use pbot\Commands\CommandListener;
 
 /**
  * Базовый класс для ботов

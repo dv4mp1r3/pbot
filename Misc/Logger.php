@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Misc;
+namespace pbot\Misc;
 
 class Logger
 {

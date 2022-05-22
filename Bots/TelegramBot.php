@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Bots;
+namespace pbot\Bots;
 
-use Commands\CommandListener;
-use Misc\Input\IReader;
+use pbot\Commands\CommandListener;
+use pbot\Misc\Input\IReader;
 
 /**
  * Базовый бот для обработки входящей инфы от телеграма

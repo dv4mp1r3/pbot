@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Commands;
+namespace pbot\Commands;
 
 
 class CommandListener

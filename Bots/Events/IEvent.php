@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Bots\Events;
+namespace pbot\Bots\Events;
 
 interface IEvent
 {

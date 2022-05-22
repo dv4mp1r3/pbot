@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Misc\Input;
+namespace pbot\Misc\Input;
 
 class FileReader implements IReader
 {

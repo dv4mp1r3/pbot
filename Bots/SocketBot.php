@@ -2,9 +2,9 @@
 
 declare(strict_types = 1);
 
-namespace Bots;
+namespace pbot\Bots;
 
-use Bots\Events\IEvent;
+use pbot\Bots\Events\IEvent;
 
 class SocketBot implements IBot
 {
@@ -61,7 +61,7 @@ class SocketBot implements IBot
     public function execute() : void
     {
         $this->openConnection();
-        
+
     }
 
     public function __desctruct()
@@ -123,7 +123,8 @@ class SocketBot implements IBot
         }
         $size = strlen($string);
         $i = \socket_write($this->s, $string, $size);
-        $this->debugPrintSocketError(__FUNCTION__, (int)$i);
+        $lastError = socket_last_error($this->s);
+        $this->debugPrintSocketError(__FUNCTION__, (int)$i, $lastError);
     }
 
     /**
@@ -137,14 +138,14 @@ class SocketBot implements IBot
         $i = socket_recv($this->s, $buffer, $len, $type);
         $lastError = socket_last_error($this->s);
         $this->debugPrintSocketError(__FUNCTION__, (int)$i, $lastError);
-        if ($lastError > 0) {
-            throw new Exception("socket_recv error ".socket_strerror($lastError)." ($lastError)");
+        if ($lastError > 0 && $lastError !== SOCKET_EAGAIN) {
+            throw new \Exception("socket_recv error ".socket_strerror($lastError)." ($lastError)");
         }
         if ($i === 0 || !$i)
         {
             return '';
         }
-        return $buffer;    
+        return $buffer;
     }
 
     protected function getConnectionLastErrorCode() : int

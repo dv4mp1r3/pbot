@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Bots;
+namespace pbot\Bots;
 
 /**
  * Базовый класс для реализации irc-ботов

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ResourceParsers;
+namespace pbot\ResourceParsers;
 
 abstract class AbstractResourceParser implements IResourceParser
 {
