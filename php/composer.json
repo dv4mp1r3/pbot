@@ -1,0 +1,29 @@
+{
+  "name": "dv4mp1r3/pbot",
+  "description": "Набор классов для реализации ботов",
+  "minimum-stability": "stable",
+  "license": "BSD License",
+  "authors": [
+    {
+      "name": "",
+      "email": ""
+    }
+  ],
+  "require": {
+    "ext-curl": "*",
+    "ext-json": "*",
+    "ext-sockets": "*",
+    "ext-posix": "*",
+    "ext-pcntl": "*",
+    "ext-gd": "*",
+    "ext-mbstring": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Bots\\": "Bots/",
+      "Commands\\": "Commands/",
+      "ResourceParsers\\": "ResourceParsers/",
+      "Misc\\": "Misc"
+    }
+  }
+}
