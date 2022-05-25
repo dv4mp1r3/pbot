@@ -9,6 +9,6 @@ services:
     volumes:
       - .:/var/www
       - ./configs/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-    entrypoint: ["php", "test.php"]
+    entrypoint: ["./vendor/bin/phpunit", "tests"]
     stdin_open: true
     tty: true

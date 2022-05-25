@@ -13,7 +13,6 @@ use pbot\Misc\Input\IReader;
  */
 class TelegramBot extends AbstractBaseBot
 {
-    const MESSAGE_ERROR_TEMPLATE = "SOMETHING WRONG".PHP_EOL.":";
     const MESSAGE_TYPE_TEXT = 'sendMessage';
     const MESSAGE_TYPE_STICKER = 'sendSticker';
 
@@ -36,11 +35,11 @@ class TelegramBot extends AbstractBaseBot
 
     /**
      * TelegramBot constructor.
-     * @param CommandListener|null $listener
      * @param IReader $reader
+     * @param CommandListener|null $listener
      * @throws \Exception
      */
-    public function __construct(CommandListener $listener = null, IReader $reader)
+    public function __construct(IReader $reader, CommandListener $listener = null)
     {
         $keyMessage = 'message';
         $this->decodedInput = json_decode($reader->readAll(), true);
@@ -85,22 +84,6 @@ class TelegramBot extends AbstractBaseBot
     }
 
     /**
-     * Сборка сообщения об ошибке
-     * @param \Exception|null $ex
-     * @return string
-     */
-    protected function buildErrorReport(\Exception $ex = null): string
-    {
-        $tgMessage = json_encode($this->decodedInput);
-        $stackTrace = '';
-        if ($ex instanceof \Exception) {
-            $stackTrace = "STACK TRACE:\n" . $ex->getTraceAsString();
-        }
-
-        return self::MESSAGE_ERROR_TEMPLATE . "$tgMessage.".PHP_EOL."$stackTrace";
-    }
-
-    /**
      *
      * @param int $chatId
      * @param string $text
@@ -109,7 +92,7 @@ class TelegramBot extends AbstractBaseBot
      */
     protected function sendMessage(int $chatId, string $text, string $method = 'sendMessage')
     {
-        header("Content-Type: application/json");
+        @header("Content-Type: application/json");
         $reply['method'] = $method;
         $reply['chat_id'] = $chatId;
         switch ($method) {
@@ -130,7 +113,7 @@ class TelegramBot extends AbstractBaseBot
      * @return array
      * @throws \Exception
      */
-    protected function checkTelegramOutput($stringOutput): array
+    protected function checkTelegramOutput(string $stringOutput): array
     {
         $data = json_decode($stringOutput, true);
         if (json_last_error() > 0) {
@@ -144,10 +127,10 @@ class TelegramBot extends AbstractBaseBot
 
     /**
      * @param string $url
-     * @return false|resource
+     * @return resource
      * @throws \Exception
      */
-    protected function buildCurlGetTemplate(string $url)
+    protected function buildCurlGetTemplate(string $url): resource
     {
         $ch = curl_init();
         if ($ch === false) {

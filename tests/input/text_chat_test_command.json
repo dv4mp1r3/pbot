@@ -1,0 +1,21 @@
+{
+  "update_id": 871764260,
+  "message": {
+    "message_id": 957,
+    "from": {
+      "id": 283613100,
+      "is_bot": false,
+      "first_name": "\u2615\ufe0f",
+      "username": "d7823858",
+      "language_code": "ru"
+    },
+    "chat": {
+      "id": 1111,
+      "first_name": "\u2615\ufe0f",
+      "username": "d7823858",
+      "type": "private"
+    },
+    "date": 1600343862,
+    "text": "/test 123456"
+  }
+}

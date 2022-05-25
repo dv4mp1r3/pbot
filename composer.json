@@ -23,7 +23,11 @@
       "pbot\\Bots\\": "Bots/",
       "pbot\\Commands\\": "Commands/",
       "pbot\\ResourceParsers\\": "ResourceParsers/",
-      "pbot\\Misc\\": "Misc"
+      "pbot\\Misc\\": "Misc",
+      "pbot\\tests\\": "tests"
     }
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.5"
   }
 }

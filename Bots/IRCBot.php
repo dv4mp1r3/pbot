@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace pbot\Bots;
 
@@ -11,7 +11,8 @@ namespace pbot\Bots;
  * @see TwitchSecurityExpertBot
  * @package Bots
  */
-abstract class IRCBot extends SocketBot{
+abstract class IRCBot extends SocketBot
+{
 
     /**
      * @var string
@@ -54,7 +55,7 @@ abstract class IRCBot extends SocketBot{
         $this->timeoutMicro = $microSeconds;
     }
 
-    public function execute() : void
+    public function execute(): void
     {
         parent::execute();
         $this->login();
@@ -70,28 +71,25 @@ abstract class IRCBot extends SocketBot{
 
     protected function joinChannels()
     {
-        foreach($this->channels as $channel)
-        {
+        foreach ($this->channels as $channel) {
             $this->sendString("JOIN #$channel\n");
         }
     }
 
-    protected function do() : void
+    protected function do(): void
     {
-        $buffer	= '';
-        while(true)
-        {
+        $buffer = '';
+        while (true) {
             $out = $this->receiveString(2048, MSG_DONTWAIT);
             if (mb_strlen($out) > 0) {
                 echo "$out\n";
                 $buffer .= $out;
                 while (($pos = strpos($buffer, "\n")) !== false) {
                     $needToBreak = $this->processMessage(trim(substr($buffer, 0, $pos)));
-                    if ($needToBreak)
-                    {
+                    if ($needToBreak) {
                         break;
                     }
-                    $buffer = substr($buffer, $pos+1);
+                    $buffer = substr($buffer, $pos + 1);
                 }
             }
             usleep($this->timeoutMicro);
@@ -102,6 +100,6 @@ abstract class IRCBot extends SocketBot{
      * @param string $message
      * @return bool
      */
-    public abstract function processMessage(string $message) : bool;
-    
+    public abstract function processMessage(string $message): bool;
+
 }

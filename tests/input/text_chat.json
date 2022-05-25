@@ -1,0 +1,21 @@
+{
+  "update_id": 1111,
+  "message": {
+    "message_id": 111,
+    "from": {
+      "id": 1111,
+      "is_bot": false,
+      "first_name": "\u2615\ufe0f",
+      "username": "username",
+      "language_code": "ru"
+    },
+    "chat": {
+      "id": 1111,
+      "first_name": "\u2615\ufe0f",
+      "username": "d7823858",
+      "type": "private"
+    },
+    "date": 1600343862,
+    "text": "test text message"
+  }
+}

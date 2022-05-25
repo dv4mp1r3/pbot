@@ -35,6 +35,9 @@ class Application
         set_error_handler([$l, Logger::ERROR_HANDLER_FUNCTION]);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function run() : void
     {
         try {
