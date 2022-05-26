@@ -10,7 +10,6 @@ use pbot\Misc\Input\IReader;
 
 /**
  * Базовый бот для обработки входящей инфы от телеграма
- * todo: вынести отправку пакетов через curl в отдельный класс
  */
 class TelegramBot extends AbstractBaseBot
 {
@@ -20,6 +19,8 @@ class TelegramBot extends AbstractBaseBot
     const FUNCTION_GETFILE = 'getFile';
 
     const API_URL = 'https://api.telegram.org';
+
+    const CONTENT_TYPE = 'Content-Type: application/json';
 
     protected array $decodedInput = [];
 
@@ -96,7 +97,9 @@ class TelegramBot extends AbstractBaseBot
      */
     protected function sendMessage(int $chatId, string $text, string $method = 'sendMessage')
     {
-        @header("Content-Type: application/json");
+        if (php_sapi_name() !== 'cli') {
+            header(CONTENT_TYPE);
+        }
         $reply['method'] = $method;
         $reply['chat_id'] = $chatId;
         switch ($method) {
@@ -141,7 +144,7 @@ class TelegramBot extends AbstractBaseBot
             throw new PbotException("Error on curl_init");
         }
         curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept: application/json', 'Content-Type: application/json']);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept: application/json', CONTENT_TYPE]);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -202,8 +205,7 @@ class TelegramBot extends AbstractBaseBot
             throw new PbotException(curl_error($ch));
         }
         curl_close($ch);
-        $fileData = $this->checkTelegramOutput($output);
-        return $fileData;
+        return $this->checkTelegramOutput($output);
     }
 
     /**
