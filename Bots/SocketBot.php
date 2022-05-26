@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace pbot\Bots;
 
+use Bots\PbotException;
 use pbot\Bots\Events\IEvent;
 
 class SocketBot implements IBot
@@ -40,7 +41,6 @@ class SocketBot implements IBot
             default:
                 return $this;
         }
-        return $this;
     }
 
     /**
@@ -72,7 +72,7 @@ class SocketBot implements IBot
     {
         $this->s = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         if (socket_connect($this->s, $this->server, intval($this->port)) === false) {
-            throw new \Exception("socket_connect() failed: "
+            throw new PbotException("socket_connect() failed: "
                 . socket_strerror(socket_last_error($this->s)));
         }
     }
@@ -131,7 +131,7 @@ class SocketBot implements IBot
         $lastError = socket_last_error($this->s);
         $this->debugPrintSocketError(__FUNCTION__, (int)$i, $lastError);
         if ($lastError > 0 && $lastError !== SOCKET_EAGAIN) {
-            throw new \Exception("socket_recv error " . socket_strerror($lastError) . " ($lastError)");
+            throw new PbotException("socket_recv error " . socket_strerror($lastError) . " ($lastError)");
         }
         if ($i === 0 || !$i) {
             return '';

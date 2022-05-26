@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace pbot\Misc\Input;
 
+use Bots\PbotException;
+
 class FileReader implements IReader
 {
     protected string $filePath;
@@ -15,12 +17,12 @@ class FileReader implements IReader
     public function readAll(): string
     {
         if (!file_exists($this->filePath)) {
-            throw new \Exception("File {$this->filePath} doesn't exists");
+            throw new PbotException("File {$this->filePath} doesn't exists");
         }
 
         $content = file_get_contents($this->filePath);
         if ($content === false) {
-            throw new \Exception("Error on file_get_contents for {$this->filePath}");
+            throw new PbotException("Error on file_get_contents for {$this->filePath}");
         }
 
         return $content;

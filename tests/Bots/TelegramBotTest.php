@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace pbot\tests\Bots;
 
 use Exception;
+use pbot\Bots\PbotException;
 use pbot\Bots\TelegramBot;
 use pbot\Commands\CommandListener;
 use pbot\Misc\Input\FileReader;
@@ -13,6 +14,14 @@ use PHPUnit\Framework\TestCase;
 
 final class TelegramBotTest extends TestCase
 {
+
+    public function setUp(): void
+    {
+        $ident = 'IDENT';
+        if (!defined($ident)) {
+            define('IDENT', getenv($ident));
+        }
+    }
 
     /**
      * @throws Exception
