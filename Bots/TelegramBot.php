@@ -134,7 +134,7 @@ class TelegramBot extends AbstractBaseBot
      * @return resource
      * @throws \Exception
      */
-    protected function buildCurlGetTemplate(string $url): resource
+    protected function buildCurlGetTemplate(string $url)
     {
         $ch = curl_init();
         if ($ch === false) {
