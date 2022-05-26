@@ -1,9 +1,10 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace pbot\Bots;
 
+use Bots\PbotException;
 use pbot\Bots\Events\IEvent;
 
 class SocketBot implements IBot
@@ -25,9 +26,6 @@ class SocketBot implements IBot
      */
     private $s;
 
-    /**
-     * @var IEvent
-     */
     protected ?IEvent $beforeSendEvent = null;
 
     /**
@@ -35,16 +33,14 @@ class SocketBot implements IBot
      * @param IEvent $event
      * @return SocketBot
      */
-    public function setEvent(string $eventType, IEvent $event) : SocketBot
+    public function setEvent(string $eventType, IEvent $event): SocketBot
     {
-        switch ($eventType)
-        {
+        switch ($eventType) {
             case self::BEFORE_SEND_EVENT:
                 $this->beforeSendEvent = $event;
             default:
                 return $this;
         }
-        return $this;
     }
 
     /**
@@ -58,13 +54,13 @@ class SocketBot implements IBot
         $this->port = $port;
     }
 
-    public function execute() : void
+    public function execute(): void
     {
         $this->openConnection();
 
     }
 
-    public function __desctruct()
+    public function __destruct()
     {
         $this->closeConnection();
     }
@@ -72,19 +68,18 @@ class SocketBot implements IBot
     /**
      * @throws \Exception
      */
-    protected function openConnection() : void
+    protected function openConnection(): void
     {
         $this->s = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         if (socket_connect($this->s, $this->server, intval($this->port)) === false) {
-            throw new \Exception("socket_connect() failed: "
+            throw new PbotException("socket_connect() failed: "
                 . socket_strerror(socket_last_error($this->s)));
         }
     }
 
     protected function closeConnection()
     {
-        if ($this->s)
-        {
+        if ($this->s) {
             \socket_close($this->s);
         }
     }
@@ -96,16 +91,13 @@ class SocketBot implements IBot
      */
     protected function debugPrintSocketError(string $function, int $returnValue, int $lastError)
     {
-        if (defined('IS_DEBUG') && IS_DEBUG)
-        {
+        if (defined('IS_DEBUG') && IS_DEBUG) {
             $ts = socket_strerror($lastError);
-            if($lastError === SOCKET_EAGAIN)
-            {
+            if ($lastError === SOCKET_EAGAIN) {
                 return;
             }
             echo "{$function}: {$ts} ($lastError)\n";
-            if ($returnValue)
-            {
+            if ($returnValue) {
                 echo "return value $returnValue\n";
             }
         }
@@ -117,8 +109,7 @@ class SocketBot implements IBot
      */
     protected function sendString(string $string, bool $startEvents = false)
     {
-        if ($startEvents && $this->beforeSendEvent instanceof IEvent)
-        {
+        if ($startEvents && $this->beforeSendEvent instanceof IEvent) {
             $this->beforeSendEvent->run();
         }
         $size = strlen($string);
@@ -131,29 +122,29 @@ class SocketBot implements IBot
      * @param int $len
      * @param int $type
      * @return string
+     * @throws \Exception
      */
-    protected function receiveString(int $len, int $type) : string
+    protected function receiveString(int $len, int $type): string
     {
         $buffer = '';
         $i = socket_recv($this->s, $buffer, $len, $type);
         $lastError = socket_last_error($this->s);
         $this->debugPrintSocketError(__FUNCTION__, (int)$i, $lastError);
         if ($lastError > 0 && $lastError !== SOCKET_EAGAIN) {
-            throw new \Exception("socket_recv error ".socket_strerror($lastError)." ($lastError)");
+            throw new PbotException("socket_recv error " . socket_strerror($lastError) . " ($lastError)");
         }
-        if ($i === 0 || !$i)
-        {
+        if ($i === 0 || !$i) {
             return '';
         }
         return $buffer;
     }
 
-    protected function getConnectionLastErrorCode() : int
+    protected function getConnectionLastErrorCode(): int
     {
         return socket_last_error($this->s);
     }
 
-    protected function getConnectionLastError() : string
+    protected function getConnectionLastError(): string
     {
         return socket_strerror($this->getConnectionLastErrorCode());
     }

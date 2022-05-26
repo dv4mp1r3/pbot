@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace pbot\Bots;
 
+use Bots\PbotException;
 use pbot\Commands\CommandListener;
 use pbot\Misc\Input\IReader;
 
@@ -13,7 +14,6 @@ use pbot\Misc\Input\IReader;
  */
 class TelegramBot extends AbstractBaseBot
 {
-    const MESSAGE_ERROR_TEMPLATE = "SOMETHING WRONG".PHP_EOL.":";
     const MESSAGE_TYPE_TEXT = 'sendMessage';
     const MESSAGE_TYPE_STICKER = 'sendSticker';
 
@@ -36,16 +36,19 @@ class TelegramBot extends AbstractBaseBot
 
     /**
      * TelegramBot constructor.
-     * @param CommandListener|null $listener
      * @param IReader $reader
+     * @param CommandListener|null $listener
      * @throws \Exception
      */
-    public function __construct(CommandListener $listener = null, IReader $reader)
+    public function __construct(IReader $reader, CommandListener $listener = null)
     {
+        if (!defined('IDENT')) {
+            throw new PbotException('Constant IDENT is not defined');
+        }
         $keyMessage = 'message';
         $this->decodedInput = json_decode($reader->readAll(), true);
         if (!is_array($this->decodedInput) || !isset($this->decodedInput[$keyMessage]['chat']['id'])) {
-            throw new \Exception('Bad data format');
+            throw new PbotException('Bad data format');
         }
 
         $this->rawText = $this->parseRawText($this->decodedInput[$keyMessage]);
@@ -85,22 +88,6 @@ class TelegramBot extends AbstractBaseBot
     }
 
     /**
-     * Сборка сообщения об ошибке
-     * @param \Exception|null $ex
-     * @return string
-     */
-    protected function buildErrorReport(\Exception $ex = null): string
-    {
-        $tgMessage = json_encode($this->decodedInput);
-        $stackTrace = '';
-        if ($ex instanceof \Exception) {
-            $stackTrace = "STACK TRACE:\n" . $ex->getTraceAsString();
-        }
-
-        return self::MESSAGE_ERROR_TEMPLATE . "$tgMessage.".PHP_EOL."$stackTrace";
-    }
-
-    /**
      *
      * @param int $chatId
      * @param string $text
@@ -109,7 +96,7 @@ class TelegramBot extends AbstractBaseBot
      */
     protected function sendMessage(int $chatId, string $text, string $method = 'sendMessage')
     {
-        header("Content-Type: application/json");
+        @header("Content-Type: application/json");
         $reply['method'] = $method;
         $reply['chat_id'] = $chatId;
         switch ($method) {
@@ -130,28 +117,28 @@ class TelegramBot extends AbstractBaseBot
      * @return array
      * @throws \Exception
      */
-    protected function checkTelegramOutput($stringOutput): array
+    protected function checkTelegramOutput(string $stringOutput): array
     {
         $data = json_decode($stringOutput, true);
         if (json_last_error() > 0) {
-            throw new \Exception(json_last_error_msg());
+            throw new PbotException(json_last_error_msg());
         }
         if ($data['ok'] !== true) {
-            throw new \Exception("error {$data['error_code']}: {$data['description']}");
+            throw new PbotException("error {$data['error_code']}: {$data['description']}");
         }
         return $data;
     }
 
     /**
      * @param string $url
-     * @return false|resource
+     * @return resource
      * @throws \Exception
      */
-    protected function buildCurlGetTemplate(string $url)
+    protected function buildCurlGetTemplate(string $url): resource
     {
         $ch = curl_init();
         if ($ch === false) {
-            throw new \Exception("Error on curl_init");
+            throw new PbotException("Error on curl_init");
         }
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept: application/json', 'Content-Type: application/json']);
@@ -173,7 +160,7 @@ class TelegramBot extends AbstractBaseBot
         $ch = $this->buildCurlGetTemplate($url);
         $fileData = curl_exec($ch);
         if (curl_errno($ch) > 0) {
-            throw new \Exception(curl_error($ch));
+            throw new PbotException(curl_error($ch));
         }
         curl_close($ch);
         $fileData = $this->checkTelegramOutput($fileData);
@@ -212,7 +199,7 @@ class TelegramBot extends AbstractBaseBot
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         $output = curl_exec($ch);
         if (curl_errno($ch) > 0) {
-            throw new \Exception(curl_error($ch));
+            throw new PbotException(curl_error($ch));
         }
         curl_close($ch);
         $fileData = $this->checkTelegramOutput($output);
@@ -227,14 +214,14 @@ class TelegramBot extends AbstractBaseBot
     protected function downloadFile(string $filePath): string
     {
         if (!defined('TELEGRAM_BOT_TOKEN')) {
-            throw new \Exception('constant TELEGRAM_BOT_TOKEN is not defined');
+            throw new PbotException('constant TELEGRAM_BOT_TOKEN is not defined');
         }
 
         $apiUrl = self::API_URL . '/file/bot' . TELEGRAM_BOT_TOKEN . '/' . $filePath;
         $ch = $this->buildCurlGetTemplate($apiUrl);
         $image = curl_exec($ch);
         if (curl_errno($ch) > 0) {
-            throw new \Exception(curl_error($ch));
+            throw new PbotException(curl_error($ch));
         }
 
         curl_close($ch);
@@ -250,7 +237,7 @@ class TelegramBot extends AbstractBaseBot
     protected static function buildFunctionUrl(string $function, array $params = []): string
     {
         if (!defined('TELEGRAM_BOT_TOKEN')) {
-            throw new \Exception('constant TELEGRAM_BOT_TOKEN is not defined');
+            throw new PbotException('constant TELEGRAM_BOT_TOKEN is not defined');
         }
 
         $apiUrl = self::API_URL . '/bot' . TELEGRAM_BOT_TOKEN . '/' . $function;
@@ -270,6 +257,23 @@ class TelegramBot extends AbstractBaseBot
     {
         $keyReplyTo = 'reply_to_message';
         $keyMessage = 'message';
+        if (!$this->tryValidateMessage($message, $keyMessage, $keyReplyTo)) {
+            return false;
+        }
+
+        if (mb_strlen($ident) > 0) {
+            return $message[$keyMessage][$keyReplyTo]['from']['username'] === $ident;
+        }
+        return true;
+    }
+
+    /**
+     * @param array $message
+     * @param string $keyMessage
+     * @param string $keyReplyTo
+     * @return bool
+     */
+    private function tryValidateMessage(array $message, string $keyMessage, string $keyReplyTo): bool {
         if (empty($message[$keyMessage][$keyReplyTo])) {
             return false;
         }
@@ -278,9 +282,6 @@ class TelegramBot extends AbstractBaseBot
             return false;
         }
 
-        if (mb_strlen($ident) > 0) {
-            return $message[$keyMessage][$keyReplyTo]['from']['username'] === $ident;
-        }
         return true;
     }
 }
