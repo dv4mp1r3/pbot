@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace pbot\Misc\Input;
 
-use Bots\PbotException;
+use pbot\Bots\PbotException;
 
 class PhpInputReader implements IReader
 {
