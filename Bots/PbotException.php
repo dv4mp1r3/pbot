@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Bots;
+namespace pbot\Bots;
 
+use \Exception;
 
-class PbotException extends \Exception
+class PbotException extends Exception
 {
 
 }

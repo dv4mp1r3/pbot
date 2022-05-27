@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace pbot\Bots;
 
-use Bots\PbotException;
 use pbot\Bots\Events\IEvent;
 
 class SocketBot implements IBot
