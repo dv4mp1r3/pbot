@@ -10,6 +10,7 @@ class SocketBot implements IBot
 {
 
     const BEFORE_SEND_EVENT = 'beforeSend';
+    const AFTER_SEND_EVENT = 'afterSend';
     /**
      * @var string
      */
@@ -25,7 +26,9 @@ class SocketBot implements IBot
      */
     private $s;
 
-    protected ?IEvent $beforeSendEvent = null;
+    protected array $beforeSendEvents = [];
+
+    protected array $afterSendEvents = [];
 
     /**
      * @param string $eventType
@@ -36,10 +39,16 @@ class SocketBot implements IBot
     {
         switch ($eventType) {
             case self::BEFORE_SEND_EVENT:
-                $this->beforeSendEvent = $event;
+                $this->beforeSendEvents[] = $event;
+                break;
+            case self::AFTER_SEND_EVENT:
+                $this->afterSendEvents[] = $event;
+                break;
             default:
-                return $this;
+                break;
+
         }
+        return $this;
     }
 
     /**
@@ -108,13 +117,24 @@ class SocketBot implements IBot
      */
     protected function sendString(string $string, bool $startEvents = false)
     {
-        if ($startEvents && $this->beforeSendEvent instanceof IEvent) {
-            $this->beforeSendEvent->run();
-        }
+        SocketBot::runEvents($this->beforeSendEvents, $startEvents);
+
         $size = strlen($string);
         $i = \socket_write($this->s, $string, $size);
         $lastError = socket_last_error($this->s);
         $this->debugPrintSocketError(__FUNCTION__, (int)$i, $lastError);
+
+        SocketBot::runEvents($this->afterSendEvents, $startEvents);
+    }
+
+    private static function runEvents(array $events, bool $startEvents): void
+    {
+        if (!$startEvents) {
+            return;
+        }
+        foreach ($events as $event) {
+            $event->run();
+        }
     }
 
     /**
