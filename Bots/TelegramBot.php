@@ -97,7 +97,7 @@ class TelegramBot extends AbstractBaseBot
     protected function sendMessage(int $chatId, string $text, string $method = 'sendMessage')
     {
         if (php_sapi_name() !== 'cli') {
-            header(CONTENT_TYPE);
+            header(self::CONTENT_TYPE);
         }
         $reply['method'] = $method;
         $reply['chat_id'] = $chatId;
@@ -133,18 +133,19 @@ class TelegramBot extends AbstractBaseBot
 
     /**
      * @param string $url
+     * @param string $requestType
      * @return resource
-     * @throws \Exception
+     * @throws PbotException
      */
-    protected function buildCurlGetTemplate(string $url)
+    protected function buildCurlGetTemplate(string $url, string $requestType = 'GET')
     {
         $ch = curl_init();
         if ($ch === false) {
             throw new PbotException("Error on curl_init");
         }
         curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept: application/json', CONTENT_TYPE]);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept: application/json', self::CONTENT_TYPE]);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $requestType);
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
