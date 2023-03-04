@@ -13,7 +13,7 @@ class PhpInputReader implements IReader
     {
         $file = "php://input";
         $content = file_get_contents($file);
-        if ($content === false) {
+        if (empty($content)) {
             throw new PbotException("Error on file_get_contents for {$file}");
         }
         return $content;
