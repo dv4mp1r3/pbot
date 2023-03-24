@@ -21,11 +21,11 @@ class TelegramBot extends AbstractBaseBot
 
     const CONTENT_TYPE = 'Content-Type: application/json';
 
-    protected array $decodedInput = [];
+    private array $decodedInput = [];
 
-    protected string $rawText = '';
+    private string $rawText = '';
 
-    protected int $chatId;
+    private int $chatId;
 
     /**
      * Устанавливается в true после первой выполненной команды
@@ -55,6 +55,21 @@ class TelegramBot extends AbstractBaseBot
 
         $this->chatId = $this->decodedInput[$keyMessage]['chat']['id'];
         parent::__construct($listener);
+    }
+
+    public function getChatId() : int
+    {
+        return $this->chatId;
+    }
+
+    public function getDecodedInput(): array
+    {
+        return $this->decodedInput;
+    }
+
+    public function getRawText(): string
+    {
+        return $this->rawText;
     }
 
     protected function parseRawText($message): string
@@ -94,7 +109,7 @@ class TelegramBot extends AbstractBaseBot
      * @param string $method
      * @throws \InvalidArgumentException
      */
-    protected function sendMessage(int $chatId, string $text, string $method = 'sendMessage')
+    public function sendMessage(int $chatId, string $text, string $method = 'sendMessage')
     {
         if (php_sapi_name() !== 'cli') {
             header(self::CONTENT_TYPE);
@@ -157,7 +172,7 @@ class TelegramBot extends AbstractBaseBot
      * @return string
      * @throws \Exception
      */
-    protected function getFilePath(string $id): string
+    public function getFilePath(string $id): string
     {
         $url = self::buildFunctionUrl('getFile', ['file_id' => $id]);
         $ch = $this->buildCurlGetTemplate($url);
@@ -176,7 +191,7 @@ class TelegramBot extends AbstractBaseBot
      * @return array
      * @throws \Exception
      */
-    protected function sendPhoto(int $chatId, string $fileContent): array
+    public function sendPhoto(int $chatId, string $fileContent): array
     {
         $boundary = uniqid();
         $eol = "\r\n";
@@ -213,7 +228,7 @@ class TelegramBot extends AbstractBaseBot
      * @return string
      * @throws \Exception
      */
-    protected function downloadFile(string $filePath): string
+    public function downloadFile(string $filePath): string
     {
         if (!defined('TELEGRAM_BOT_TOKEN')) {
             throw new PbotException('constant TELEGRAM_BOT_TOKEN is not defined');
